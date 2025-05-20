@@ -107,9 +107,7 @@
       'video4': 'Industrie'
     };
 
-    async function loadVideos() {
-      const res = await fetch('/videos');
-      const videos = await res.json();
+    function updateInterface(videos) {
       const controls = document.getElementById('controls');
       const bgVideo = document.getElementById('bgVideo');
       controls.innerHTML = '<div class="title">Atmos</div>';
@@ -143,14 +141,26 @@
       });
     }
 
+    async function loadVideos() {
+      const res = await fetch('/videos');
+      const videos = await res.json();
+      updateInterface(videos);
+    }
+
     async function toggleVideo(id, active) {
       try {
-        await fetch(`/videos/${id}`, {
+        const response = await fetch(`/videos/${id}`, {
           method: 'PATCH',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ active })
         });
-        loadVideos();
+        
+        if (!response.ok) {
+          throw new Error('Erreur lors de la mise à jour');
+        }
+        
+        // Recharger toutes les vidéos
+        await loadVideos();
       } catch (error) {
         console.error('Erreur lors du changement de vidéo:', error);
       }

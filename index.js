@@ -57,12 +57,26 @@ app.get('/videos', async (req, res) => {
 app.patch('/videos/:id', async (req, res) => {
   try {
     const { active } = req.body;
-    const video = await Video.findByIdAndUpdate(req.params.id, { active }, { new: true });
-    if (!video) {
+    
+    // Vérifier si la vidéo existe avant de faire des modifications
+    const targetVideo = await Video.findById(req.params.id);
+    if (!targetVideo) {
       return res.status(404).json({ error: 'Vidéo non trouvée' });
     }
-    res.json(video);
+    
+    if (active) {
+      // Désactiver toutes les autres vidéos
+      await Video.updateMany({}, { active: false });
+    }
+    
+    // Mettre à jour la vidéo cible
+    targetVideo.active = active;
+    await targetVideo.save();
+    
+    // Renvoyer la vidéo mise à jour
+    res.json({ success: true });
   } catch (error) {
+    console.error('Erreur:', error);
     res.status(500).json({ error: error.message });
   }
 });
