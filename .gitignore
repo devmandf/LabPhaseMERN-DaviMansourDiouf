@@ -1,0 +1,17 @@
+# Fichiers locaux à ignorer
+Capture d'écran 2025-05-20 204554.png
+NFO.txt
+
+# Dépendances Node.js
+node_modules/
+
+# Fichiers d'environnement
+.env
+
+# Logs
+*.log
+npm-debug.log*
+
+# Fichiers système
+.DS_Store
+Thumbs.db
