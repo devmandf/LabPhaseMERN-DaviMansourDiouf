@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
-  <title>Fond Vidéo</title>
+  <title>Switch Vidéos</title>
   <style>
     body, html {
       margin: 0;
@@ -24,34 +24,58 @@
       left: 20px;
       z-index: 1;
     }
-    .controls button {
-      margin: 5px;
-      padding: 10px 20px;
-      font-size: 16px;
-      cursor: pointer;
+    .switch {
+      display: flex;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+    .switch input {
+      margin-right: 10px;
     }
   </style>
 </head>
 <body>
   <video id="bgVideo" autoplay muted loop>
-    <source src="video1.mp4" type="video/mp4">
+    <source src="" type="video/mp4">
     Ton navigateur ne supporte pas la vidéo.
   </video>
 
-  <div class="controls">
-    <button onclick="changeVideo('video1.mp4')">Vidéo 1</button>
-    <button onclick="changeVideo('video2.mp4')">Vidéo 2</button>
-    <button onclick="changeVideo('video3.mp4')">Vidéo 3</button>
-    <button onclick="changeVideo('video4.mp4')">Vidéo 4</button>
-  </div>
+  <div class="controls" id="controls"></div>
 
   <script>
-    function changeVideo(src) {
-      const video = document.getElementById('bgVideo');
-      video.src = src;
-      video.load();
-      video.play();
+    async function loadVideos() {
+      const res = await fetch('/videos');
+      const videos = await res.json();
+      const controls = document.getElementById('controls');
+      controls.innerHTML = '';
+      videos.forEach(video => {
+        const div = document.createElement('div');
+        div.className = 'switch';
+        const checkbox = document.createElement('input');
+        checkbox.type = 'checkbox';
+        checkbox.checked = video.active;
+        checkbox.onchange = () => toggleVideo(video._id, checkbox.checked);
+        const label = document.createElement('label');
+        label.textContent = video.name;
+        div.appendChild(checkbox);
+        div.appendChild(label);
+        controls.appendChild(div);
+        if (video.active) {
+          document.getElementById('bgVideo').src = video.path;
+        }
+      });
     }
+
+    async function toggleVideo(id, active) {
+      await fetch(`/videos/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ active })
+      });
+      loadVideos();
+    }
+
+    loadVideos();
   </script>
 </body>
 </html>
