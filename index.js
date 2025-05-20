@@ -9,22 +9,10 @@ mongoose.connect("mongodb+srv://devinho:GeneraL123ForGlobalTest@cluster0.seme1.m
 });
 
 app.use(express.json());
-
-const Todo = mongoose.model("Todo", { text: String });
+app.use(express.static('public')); // Sert les fichiers statiques depuis le dossier 'public'
 
 app.get("/", (req, res) => {
   res.sendFile(__dirname + "/client.html");
-});
-
-app.get("/todos", async (req, res) => {
-  const todos = await Todo.find();
-  res.json(todos);
-});
-
-app.post("/todos", async (req, res) => {
-  const todo = new Todo({ text: req.body.text });
-  await todo.save();
-  res.json(todo);
 });
 
 app.listen(PORT, () => console.log("Server en ligne sur le port " + PORT));
