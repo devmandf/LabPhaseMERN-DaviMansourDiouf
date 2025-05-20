@@ -2,39 +2,56 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
-  <title>Todo MERN</title>
+  <title>Fond Vidéo</title>
+  <style>
+    body, html {
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+    }
+    #bgVideo {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      z-index: -1;
+    }
+    .controls {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      z-index: 1;
+    }
+    .controls button {
+      margin: 5px;
+      padding: 10px 20px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+  </style>
 </head>
 <body>
-  <h1>Ma Todo</h1>
-  <input id="todoInput" placeholder="Ecris un truc..." />
-  <button onclick="addTodo()">Ajouter</button>
-  <ul id="todoList"></ul>
+  <video id="bgVideo" autoplay muted loop>
+    <source src="video1.mp4" type="video/mp4">
+    Ton navigateur ne supporte pas la vidéo.
+  </video>
+
+  <div class="controls">
+    <button onclick="changeVideo('video1.mp4')">Vidéo 1</button>
+    <button onclick="changeVideo('video2.mp4')">Vidéo 2</button>
+    <button onclick="changeVideo('video3.mp4')">Vidéo 3</button>
+    <button onclick="changeVideo('video4.mp4')">Vidéo 4</button>
+  </div>
 
   <script>
-    async function loadTodos() {
-      const res = await fetch("/todos");
-      const todos = await res.json();
-      const list = document.getElementById("todoList");
-      list.innerHTML = "";
-      todos.forEach(todo => {
-        const li = document.createElement("li");
-        li.textContent = todo.text;
-        list.appendChild(li);
-      });
+    function changeVideo(src) {
+      const video = document.getElementById('bgVideo');
+      video.src = src;
+      video.load();
+      video.play();
     }
-
-    async function addTodo() {
-      const input = document.getElementById("todoInput");
-      await fetch("/todos", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text: input.value })
-      });
-      input.value = "";
-      loadTodos();
-    }
-
-    loadTodos();
   </script>
 </body>
 </html>
