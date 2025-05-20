@@ -37,3 +37,5 @@ app.patch('/videos/:id', async (req, res) => {
 });
 
 app.listen(PORT, () => console.log("Server en ligne sur le port " + PORT));
+
+console.log
