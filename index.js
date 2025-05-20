@@ -71,10 +71,15 @@ app.patch('/videos/:id', async (req, res) => {
 app.get('/reset-videos', async (req, res) => {
   try {
     await Video.deleteMany({});
-    const videoFiles = ['video1.mp4', 'video2.mp4', 'video3.mp4', 'video4.mp4'];
-    const videos = videoFiles.map(filename => ({
-      name: filename.replace('.mp4', ''),
-      path: filename,
+    const videoFiles = [
+      { file: 'video1.mp4', name: 'video1' },
+      { file: 'video2.mp4', name: 'video2' },
+      { file: 'video3.mp4', name: 'video3' },
+      { file: 'video4.mp4', name: 'video4' }
+    ];
+    const videos = videoFiles.map(video => ({
+      name: video.name,
+      path: video.file,
       active: false
     }));
     await Video.insertMany(videos);

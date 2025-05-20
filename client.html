@@ -8,6 +8,7 @@
       margin: 0;
       padding: 0;
       overflow: hidden;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     }
     #bgVideo {
       position: fixed;
@@ -17,20 +18,73 @@
       height: 100%;
       object-fit: cover;
       z-index: -1;
+      display: none;
+    }
+    body {
+      background: url('background5.png') no-repeat center center fixed;
+      background-size: cover;
     }
     .controls {
       position: absolute;
       top: 20px;
       left: 20px;
       z-index: 1;
+      background: rgba(0, 0, 0, 0.6);
+      padding: 20px;
+      border-radius: 15px;
+      backdrop-filter: blur(10px);
     }
     .switch {
       display: flex;
       align-items: center;
-      margin-bottom: 10px;
+      margin-bottom: 20px;
+      color: white;
     }
-    .switch input {
-      margin-right: 10px;
+    .switch:last-child {
+      margin-bottom: 0;
+    }
+    .switch-label {
+      margin-left: 15px;
+      font-size: 1.1em;
+      font-weight: 500;
+      text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.3);
+    }
+    .toggle {
+      position: relative;
+      width: 60px;
+      height: 30px;
+      background: #ccc;
+      border-radius: 30px;
+      padding: 4px;
+      transition: 300ms all;
+      cursor: pointer;
+    }
+    .toggle:before {
+      transition: 300ms all;
+      content: '';
+      position: absolute;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      top: 50%;
+      left: 4px;
+      background: white;
+      transform: translate(0, -50%);
+    }
+    .toggle.active {
+      background: #4CAF50;
+    }
+    .toggle.active:before {
+      transform: translate(30px, -50%);
+    }
+    .title {
+      color: white;
+      font-size: 1.5em;
+      margin-bottom: 20px;
+      text-align: center;
+      font-weight: bold;
+      text-transform: uppercase;
+      letter-spacing: 2px;
     }
   </style>
 </head>
@@ -40,39 +94,65 @@
     Ton navigateur ne supporte pas la vidéo.
   </video>
 
-  <div class="controls" id="controls"></div>
+  <div class="controls" id="controls">
+    <div class="title">Atmos</div>
+  </div>
 
   <script>
+    const videoNames = {
+      'video1': 'Ciel Clair',
+      'video2': 'Storm',
+      'video3': 'Lunaire',
+      'video4': 'Industrie'
+    };
+
     async function loadVideos() {
       const res = await fetch('/videos');
       const videos = await res.json();
       const controls = document.getElementById('controls');
-      controls.innerHTML = '';
+      const bgVideo = document.getElementById('bgVideo');
+      controls.innerHTML = '<div class="title">Atmos</div>';
+      
+      // Vérifier si une vidéo est active
+      const activeVideo = videos.find(v => v.active);
+      
+      if (activeVideo) {
+        bgVideo.src = activeVideo.path;
+        bgVideo.style.display = 'block';
+      } else {
+        bgVideo.src = '';
+        bgVideo.style.display = 'none';
+      }
+      
       videos.forEach(video => {
         const div = document.createElement('div');
         div.className = 'switch';
-        const checkbox = document.createElement('input');
-        checkbox.type = 'checkbox';
-        checkbox.checked = video.active;
-        checkbox.onchange = () => toggleVideo(video._id, checkbox.checked);
-        const label = document.createElement('label');
-        label.textContent = video.name;
-        div.appendChild(checkbox);
+        
+        const toggle = document.createElement('div');
+        toggle.className = `toggle ${video.active ? 'active' : ''}`;
+        toggle.onclick = () => toggleVideo(video._id, !video.active);
+        
+        const label = document.createElement('span');
+        label.className = 'switch-label';
+        label.textContent = videoNames[video.name] || video.name;
+        
+        div.appendChild(toggle);
         div.appendChild(label);
         controls.appendChild(div);
-        if (video.active) {
-          document.getElementById('bgVideo').src = video.path;
-        }
       });
     }
 
     async function toggleVideo(id, active) {
-      await fetch(`/videos/${id}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ active })
-      });
-      loadVideos();
+      try {
+        await fetch(`/videos/${id}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ active })
+        });
+        loadVideos();
+      } catch (error) {
+        console.error('Erreur lors du changement de vidéo:', error);
+      }
     }
 
     loadVideos();
