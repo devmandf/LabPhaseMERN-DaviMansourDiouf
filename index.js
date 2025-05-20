@@ -10,7 +10,7 @@ function isMongoConnected() {
 
 // Middleware
 app.use(express.json());
-app.use('/public', express.static('public')); // Sert les fichiers statiques depuis le dossier 'public'
+app.use(express.static('public')); // Sert les fichiers statiques depuis le dossier 'public'
 
 // Middleware pour vérifier la connexion MongoDB
 app.use(async (req, res, next) => {
@@ -67,6 +67,23 @@ app.patch('/videos/:id', async (req, res) => {
   }
 });
 
+// Route temporaire pour réinitialiser les vidéos
+app.get('/reset-videos', async (req, res) => {
+  try {
+    await Video.deleteMany({});
+    const videoFiles = ['video1.mp4', 'video2.mp4', 'video3.mp4', 'video4.mp4'];
+    const videos = videoFiles.map(filename => ({
+      name: filename.replace('.mp4', ''),
+      path: filename,
+      active: false
+    }));
+    await Video.insertMany(videos);
+    res.json({ message: 'Vidéos réinitialisées avec succès' });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 
 
 // Initialisation des vidéos
@@ -78,7 +95,7 @@ async function initVideos() {
       const videoFiles = ['video1.mp4', 'video2.mp4', 'video3.mp4', 'video4.mp4'];
       const videos = videoFiles.map(filename => ({
         name: filename.replace('.mp4', ''),
-        path: `/public/${filename}`,  // Chemin correct pour accéder aux vidéos via le navigateur
+        path: filename,  // Chemin relatif au dossier public
         active: false
       }));
       
